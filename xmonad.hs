@@ -4,7 +4,7 @@ import XMonad.Hooks.ManageDocks
 import XMonad.Config.Gnome
  
 main = do
-    xmonad =<< dzen gnomeConfig
+    xmonad =<< dzen defaultConfig
         { modMask = mod4Mask
         , terminal = "urxvt"
         }
