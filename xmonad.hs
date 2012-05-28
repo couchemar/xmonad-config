@@ -16,7 +16,8 @@ import XMonad.Layout.Cross
 main = withConnection Session $ \ dbus -> do
     getWellKnownName dbus
     xmonad $ gnomeConfig
-        { modMask = mod4Mask
+        { focusFollowsMouse = False
+        , modMask = mod4Mask
         , terminal = "urxvt"
         ,  manageHook = manageDocks <+> manageHook gnomeConfig
         , layoutHook = avoidStruts  $  layoutHook gnomeConfig ||| spiral (6/7) ||| simpleCross
