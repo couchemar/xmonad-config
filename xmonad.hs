@@ -12,6 +12,8 @@ import XMonad.Util.EZConfig
 import XMonad.Layout.Spiral
 import XMonad.Layout.Cross
 
+import XMonad.Layout.MosaicAlt
+import qualified Data.Map as M
  
 main = withConnection Session $ \ dbus -> do
     getWellKnownName dbus
@@ -20,7 +22,9 @@ main = withConnection Session $ \ dbus -> do
         , modMask = mod4Mask
         , terminal = "urxvt"
         ,  manageHook = manageDocks <+> manageHook gnomeConfig
-        , layoutHook = avoidStruts  $  layoutHook gnomeConfig ||| spiral (6/7) ||| simpleCross
+        , layoutHook = avoidStruts  $  layoutHook gnomeConfig
+                                        ||| spiral (6/7) ||| simpleCross
+                                        ||| MosaicAlt M.empty
         , logHook = dynamicLogWithPP (myPrettyPrinter dbus)
         } `additionalKeys`
         [ ((mod4Mask .|. shiftMask, xK_z), spawn "xscreensaver-command -lock")
