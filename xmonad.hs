@@ -1,6 +1,8 @@
 import XMonad
 import XMonad.Config.Gnome
+
 import XMonad.Hooks.DynamicLog
+import XMonad.Hooks.ManageDocks
 
 import XMonad.Util.Run
 
@@ -9,21 +11,29 @@ import XMonad.Util.EZConfig
 import XMonad.Util.Scratchpad (scratchpadSpawnAction, scratchpadManageHook, scratchpadFilterOutWorkspace)
 import XMonad.Util.WorkspaceCompare
 
+import XMonad.Layout.Spiral
+import XMonad.Layout.Cross
+
+import XMonad.Layout.MosaicAlt
+import qualified Data.Map as M
+
+
 -- Dzen config
 myStatusBar = "dzen2 -x '0' -y '0' -h '24' -w '1280' -ta 'l' -fg '#FFFFFF' -bg '#161616'"
 
 
 main = do
-	dzenTopBar <- spawnPipe myStatusBar
-	conf <- dzen gnomeConfig
-	xmonad $ conf
-		{ focusFollowsMouse = False
+    dzenTopBar <- spawnPipe myStatusBar
+    conf <- dzen gnomeConfig
+    xmonad $ conf
+        { focusFollowsMouse = False
         , modMask = mod4Mask
         , logHook = myLogHook dzenTopBar
-		} `additionalKeysP`
-		[ ("M-S-q", spawn "gnome-session-quit")
-		, ("M-S-l",    spawn "gnome-screensaver-command -l")
-		]
+        , layoutHook = myLayoutHook
+        } `additionalKeysP`
+        [ ("M-S-q", spawn "gnome-session-quit")
+        , ("M-S-l",    spawn "gnome-screensaver-command -l")
+        ]
 
 myLogHook h = (dynamicLogWithPP $ defaultPP { 
     ppSort = fmap (.scratchpadFilterOutWorkspace) getSortByTag
@@ -56,3 +66,7 @@ colorBlack   = "#000000"
 colorGrey1   = "#808080"        
 colorGrey2   = "#808080"        
 colorGrey3   = "#CCCCCC"
+
+myLayoutHook = avoidStruts  $  layoutHook gnomeConfig
+                ||| spiral (6/7) ||| simpleCross
+                ||| MosaicAlt M.empty
