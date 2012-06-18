@@ -8,7 +8,8 @@ import XMonad.Util.Run
 
 import XMonad.Util.EZConfig
 
-import XMonad.Util.Scratchpad (scratchpadSpawnAction, scratchpadManageHook, scratchpadFilterOutWorkspace)
+import XMonad.Util.Scratchpad (scratchpadFilterOutWorkspace)
+
 import XMonad.Util.WorkspaceCompare
 
 import XMonad.Layout.Spiral
@@ -54,18 +55,11 @@ myLogHook h = (dynamicLogWithPP $ defaultPP {
     namedOnly ws = if any (`elem` ws) ['a'..'z'] then pad ws else ""
 
 
-colorWhite   = "snow1" 
-colorOrange  = "orange"        
 colorRed     = "red"
-colorBrown   = "#663300"     
 colorZburn   = "#3f3f3f"
 colorZburn1  = "#80d4aa"
 colorZburn2  = "#f0dfaf"
-colorRed1    = "#543532"   
-colorBlack   = "#000000"         
-colorGrey1   = "#808080"        
-colorGrey2   = "#808080"        
-colorGrey3   = "#CCCCCC"
+
 
 myLayoutHook = avoidStruts  $  layoutHook gnomeConfig
                 ||| spiral (6/7) ||| simpleCross
