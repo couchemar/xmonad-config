@@ -22,7 +22,7 @@ import qualified Data.Map as M
 -- Dzen config
 myStatusBar = "dzen2 -x '0' -y '0' -h '24' -w '1280' -ta 'l' -fg '#FFFFFF' -bg '#161616'"
 
-myWorkspaces = ["1-im", "2-web", "3-dev"] ++ map show [4..9]
+myWorkspaces = ["1-im", "2-web"] ++ map show [3..9]
 
 main = do
     dzenTopBar <- spawnPipe myStatusBar
