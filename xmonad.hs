@@ -20,7 +20,7 @@ import qualified Data.Map as M
 
 
 -- Dzen config
-myStatusBar = "dzen2 -x '0' -y '0' -h '24' -w '1280' -ta 'l' -fg '#FFFFFF' -bg '#161616'"
+myStatusBar = "dzen2 -x '0' -y '744' -h '24' -w '1366' -ta 'l' -fg '#FFFFFF' -bg '#161616'"
 
 myWorkspaces = ["1-im", "2-web"] ++ map show [3..9]
 
@@ -38,17 +38,17 @@ main = do
         , ("M-S-l",    spawn "gnome-screensaver-command -l")
         ]
 
-myLogHook h = (dynamicLogWithPP $ defaultPP { 
+myLogHook h = (dynamicLogWithPP $ defaultPP {
     ppSort = fmap (.scratchpadFilterOutWorkspace) getSortByTag
   , ppCurrent         = dzenColor colorZburn1 colorZburn . pad
   , ppHidden          = dzenFG    colorZburn2 . pad
   , ppHiddenNoWindows = namedOnly
   , ppUrgent          = myWrap    colorRed   "{"  "}"  . pad
-  , ppTitle           = dzenColor colorZburn2 colorZburn . shorten 55 
+  , ppTitle           = dzenColor colorZburn2 colorZburn . shorten 55
   , ppWsSep           = " "
   , ppSep             = " | "
   , ppOutput          = hPutStrLn h
- }) 
+ })
 
   where
 
