@@ -1,78 +1,68 @@
-import Control.OldException(catchDyn,try)
-import DBus
-import DBus.Connection
-import DBus.Message
 import XMonad
 import XMonad.Config.Gnome
+
 import XMonad.Hooks.DynamicLog
 import XMonad.Hooks.ManageDocks
-import XMonad.ManageHook
+
+import XMonad.Util.Run
+
 import XMonad.Util.EZConfig
+
+import XMonad.Util.Scratchpad (scratchpadFilterOutWorkspace)
+
+import XMonad.Util.WorkspaceCompare
 
 import XMonad.Layout.Spiral
 import XMonad.Layout.Cross
 
 import XMonad.Layout.MosaicAlt
 import qualified Data.Map as M
- 
-main = withConnection Session $ \ dbus -> do
-    getWellKnownName dbus
-    xmonad $ gnomeConfig
+
+
+-- Dzen config
+myStatusBar = "dzen2 -x '0' -y '0' -h '24' -w '1280' -ta 'l' -fg '#FFFFFF' -bg '#161616'"
+
+myWorkspaces = ["1-im", "2-web"] ++ map show [3..9]
+
+main = do
+    dzenTopBar <- spawnPipe myStatusBar
+    conf <- dzen gnomeConfig
+    xmonad $ conf
         { focusFollowsMouse = False
+        , workspaces = myWorkspaces
         , modMask = mod4Mask
-        , terminal = "urxvt"
-        ,  manageHook = manageDocks <+> manageHook gnomeConfig
-        , layoutHook = avoidStruts  $  layoutHook gnomeConfig
-                                        ||| spiral (6/7) ||| simpleCross
-                                        ||| MosaicAlt M.empty
-        , logHook = dynamicLogWithPP (myPrettyPrinter dbus)
-        } `additionalKeys`
-        [ ((mod4Mask .|. shiftMask, xK_z), spawn "xscreensaver-command -lock")
+        , logHook = myLogHook dzenTopBar
+        , layoutHook = myLayoutHook
+        } `additionalKeysP`
+        [ ("M-S-q", spawn "gnome-session-quit")
+        , ("M-S-l",    spawn "gnome-screensaver-command -l")
         ]
 
-myPrettyPrinter :: Connection -> PP
-myPrettyPrinter dbus = defaultPP {
-    ppOutput  = outputThroughDBus dbus
-  , ppTitle   = pangoColor "#003366" . shorten 50 . pangoSanitize
-  , ppCurrent = pangoColor "#006666" . wrap "[" "]" . pangoSanitize
-  , ppVisible = pangoColor "#663366" . wrap "(" ")" . pangoSanitize
-  , ppHidden  = wrap " " " "
-  , ppUrgent  = pangoColor "red"
-  }
+myLogHook h = (dynamicLogWithPP $ defaultPP { 
+    ppSort = fmap (.scratchpadFilterOutWorkspace) getSortByTag
+  , ppCurrent         = dzenColor colorZburn1 colorZburn . pad
+  , ppHidden          = dzenFG    colorZburn2 . pad
+  , ppHiddenNoWindows = namedOnly
+  , ppUrgent          = myWrap    colorRed   "{"  "}"  . pad
+  , ppTitle           = dzenColor colorZburn2 colorZburn . shorten 55 
+  , ppWsSep           = " "
+  , ppSep             = " | "
+  , ppOutput          = hPutStrLn h
+ }) 
+
+  where
+
+    dzenFG c     = dzenColor c ""
+    myWrap c l r = wrap (dzenFG c l) (dzenFG c r)
+    namedOnly ws = if any (`elem` ws) ['a'..'z'] then pad ws else ""
 
 
--- This retry is really awkward, but sometimes DBus won't let us get our
--- name unless we retry a couple times.
-getWellKnownName :: Connection -> IO ()
-getWellKnownName dbus = tryGetName `catchDyn` (\ (DBus.Error _ _) ->
-                                                getWellKnownName dbus)
- where
-  tryGetName = do
-    namereq <- newMethodCall serviceDBus pathDBus interfaceDBus "RequestName"
-    addArgs namereq [String "org.xmonad.Log", Word32 5]
-    sendWithReplyAndBlock dbus namereq 0
-    return ()
+colorRed     = "red"
+colorZburn   = "#3f3f3f"
+colorZburn1  = "#80d4aa"
+colorZburn2  = "#f0dfaf"
 
-outputThroughDBus :: Connection -> String -> IO ()
-outputThroughDBus dbus str = do
-  let str' = "<span font=\"Terminus 9 Bold\">" ++ str ++ "</span>"
-  msg <- newSignal "/org/xmonad/Log" "org.xmonad.Log" "Update"
-  addArgs msg [String str']
-  send dbus msg 0 `catchDyn` (\ (DBus.Error _ _ ) -> return 0)
-  return ()
 
-pangoColor :: String -> String -> String
-pangoColor fg = wrap left right
- where
-  left  = "<span foreground=\"" ++ fg ++ "\">"
-  right = "</span>"
-
-pangoSanitize :: String -> String
-pangoSanitize = foldr sanitize ""
- where
-  sanitize '>'  acc = "&gt;" ++ acc
-  sanitize '<'  acc = "&lt;" ++ acc
-  sanitize '\"' acc = "&quot;" ++ acc
-  sanitize '&'  acc = "&amp;" ++ acc
-  sanitize x    acc = x:acc
-
+myLayoutHook = avoidStruts  $  layoutHook gnomeConfig
+                ||| spiral (6/7) ||| simpleCross
+                ||| MosaicAlt M.empty
