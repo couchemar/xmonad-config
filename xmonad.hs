@@ -36,6 +36,7 @@ main = do
         } `additionalKeysP`
         [ ("M-S-q", spawn "gnome-session-quit")
         , ("M-S-l",    spawn "gnome-screensaver-command -l")
+        , ("M-r", spawn "dmenu_run")
         ]
 
 myLogHook h = (dynamicLogWithPP $ defaultPP { 
