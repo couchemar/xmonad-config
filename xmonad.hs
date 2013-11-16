@@ -1,5 +1,5 @@
 import XMonad
-import XMonad.Config.Gnome
+import XMonad.Config.Xfce
 
 import XMonad.Hooks.DynamicLog
 import XMonad.Hooks.ManageDocks
@@ -24,11 +24,14 @@ myStatusBar = "dzen2 -x '0' -y '746' -h '22' -w '1366' -ta 'l' -fg '#FFFFFF' -bg
 
 myWorkspaces = ["1-im", "2-web"] ++ map show [3..9]
 
+myTerminal = "xfce4-terminal"
+
 main = do
     dzenTopBar <- spawnPipe myStatusBar
-    conf <- dzen gnomeConfig
+    conf <- dzen xfceConfig
     xmonad $ conf
-        { focusFollowsMouse = False
+        { terminal = myTerminal
+		, focusFollowsMouse = False
         , workspaces = myWorkspaces
         , modMask = mod4Mask
         , logHook = myLogHook dzenTopBar
@@ -64,6 +67,6 @@ colorZburn1  = "#80d4aa"
 colorZburn2  = "#f0dfaf"
 
 
-myLayoutHook = avoidStruts  $  layoutHook gnomeConfig
+myLayoutHook = avoidStruts  $  layoutHook xfceConfig
                 ||| spiral (6/7) ||| simpleCross
                 ||| MosaicAlt M.empty
