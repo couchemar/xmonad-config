@@ -8,7 +8,8 @@ import XMonad.Util.Run
 
 import XMonad.Util.EZConfig
 
-import XMonad.Util.Scratchpad (scratchpadFilterOutWorkspace)
+import XMonad.Util.Scratchpad ( scratchpadFilterOutWorkspace
+                                                     , scratchpadManageHookDefault )
 
 import XMonad.Util.WorkspaceCompare
 
@@ -36,6 +37,7 @@ main = do
         , modMask = mod4Mask
         , logHook = myLogHook dzenTopBar
         , layoutHook = myLayoutHook
+        , manageHook = myManageHook
         } `additionalKeysP`
         [ ("M-S-q", spawn "gnome-session-quit")
         , ("M-S-l",    spawn "gnome-screensaver-command -l")
@@ -70,3 +72,24 @@ colorZburn2  = "#f0dfaf"
 myLayoutHook = avoidStruts  $  layoutHook kde4Config
                 ||| spiral (6/7) ||| simpleCross
                 ||| MosaicAlt M.empty
+
+
+myManageHook = scratchpadManageHookDefault <+>composeAll (
+             [ manageHook kde4Config
+             , className =? "Tilda" --> doFloat
+             , className =? "Guake.py" --> doFloat
+             , className =? "Yakuake" --> doFloat
+             , className =? "Unity-2d-panel" --> doIgnore
+             , className =? "Unity-2d-shell" --> doIgnore
+             , className =? "Unity-2d-launcher" --> doIgnore
+             , resource =? "desktop_window" --> doIgnore
+             , resource =? "kdesktop" --> doIgnore
+             , className =? "MPlayer" --> doFloat
+             , className =? "Plasma" --> doFloat
+             , className =? "Plasma-desktop" --> doFloat
+             , className =? "Knotes" --> doFloat
+             , className =? "Klipper" --> doFloat
+             , className =? "XCalc" --> doFloat
+             , className =? "Kcalc" --> doFloat
+             , className =? "emulator-arm" --> doFloat
+             ])
