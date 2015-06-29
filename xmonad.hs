@@ -8,7 +8,7 @@ import XMonad.Util.Run
 
 import XMonad.Util.EZConfig
 
-import XMonad.Util.Scratchpad (scratchpadFilterOutWorkspace)
+import XMonad.Util.Scratchpad (scratchpadFilterOutWorkspace, scratchpadManageHookDefault)
 
 import XMonad.Util.WorkspaceCompare
 
@@ -22,10 +22,13 @@ import qualified Data.Map as M
 -- Dzen config
 myStatusBar = "dzen2 -x '0' -y '1026' -h '24' -w '1680' -ta 'l' -fg '#FFFFFF' -bg '#161616'"
 
+tilda = "tilda"
+
 myWorkspaces = ["1-im", "2-web"] ++ map show [3..9]
 
 main = do
     dzenTopBar <- spawnPipe myStatusBar
+    spawn tilda
     conf <- dzen gnomeConfig
     xmonad $ conf
         { focusFollowsMouse = False
@@ -33,6 +36,7 @@ main = do
         , modMask = mod4Mask
         , logHook = myLogHook dzenTopBar
         , layoutHook = myLayoutHook
+        , manageHook = myManageHook
         } `additionalKeysP`
         [ ("M-S-q", spawn "gnome-session-quit")
         , ("M-S-l",    spawn "gnome-screensaver-command -l")
@@ -67,3 +71,8 @@ colorZburn2  = "#f0dfaf"
 myLayoutHook = avoidStruts  $  layoutHook gnomeConfig
                 ||| spiral (6/7) ||| simpleCross
                 ||| MosaicAlt M.empty
+
+myManageHook = scratchpadManageHookDefault <+>composeAll (
+             [ manageHook gnomeConfig
+             , className =? ".tilda-wrapped" --> doFloat
+             ])
